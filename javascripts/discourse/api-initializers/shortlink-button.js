@@ -1,31 +1,31 @@
 import { apiInitializer } from "discourse/lib/api";
+import I18n from "discourse-i18n";
 
 export default apiInitializer("0.11.1", (api) => {
   const shortDomain = settings.short_domain || "wpcy.com";
-  const buttonLabel = settings.button_label || "复制短链";
+
+  // 使用翻译键，但在设置中允许覆盖
+  // 如果 settings.button_label 和默认值不同，我们需要动态覆盖翻译或者直接使用
+  // 为了简单，我们优先使用翻译键
+  const buttonLabelKey = "wpcy_shortlink.copy_button";
+  const buttonTitleKey = "wpcy_shortlink.copy_title";
 
   if (api.registerTopicFooterButton) {
     api.registerTopicFooterButton({
       id: "share-shortlink",
       icon: "link",
       priority: 250,
-      label: buttonLabel,
-      title: "复制短链接到剪贴板",
+
+      // 使用翻译键
+      label: buttonLabelKey,
+      title: buttonTitleKey,
 
       action() {
-        // 尝试从不同的地方获取 topic
-        const topic = this.topic || (this.args && this.args.topic) || (this.outletArgs && this.outletArgs.topic);
-
-        if (!topic || !topic.id) {
-          console.error("WPCY Shortlink: Cannot find topic ID", this);
-          alert("无法获取话题 ID");
-          return;
-        }
+        const topic = this.topic || (this.args && this.args.topic);
+        if (!topic || !topic.id) return;
 
         const topicId = topic.id;
         const shortUrl = `https://${shortDomain}/t/${topicId}`;
-
-        console.log("WPCY Shortlink: Copying", shortUrl);
 
         const doCopy = () => {
           if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -34,9 +34,8 @@ export default apiInitializer("0.11.1", (api) => {
             const textArea = document.createElement("textarea");
             textArea.value = shortUrl;
             textArea.style.position = "fixed";
-            textArea.style.left = "-9999px";
+            textArea.style.opacity = "0";
             document.body.appendChild(textArea);
-            textArea.focus();
             textArea.select();
             try {
               document.execCommand('copy');
@@ -50,30 +49,36 @@ export default apiInitializer("0.11.1", (api) => {
         };
 
         doCopy().then(() => {
-          // 尝试多种方式显示成功消息
+          // 使用 api.container 获取服务，确保兼容性
+          const container = api.container;
+
+          // 尝试多种与用户交互的方式
+
+          // 1. Flash Message (首选)
+          const message = I18n.t("wpcy_shortlink.copied", { url: shortUrl });
+
+          // 尝试通过 appEvents 触发
           if (this.appEvents) {
             this.appEvents.trigger("discourse:flash-message", {
               type: "success",
-              message: `已复制: ${shortUrl}`
+              message: message
             });
-          } else if (api.container) {
-            const appEvents = api.container.lookup("service:app-events");
-            if (appEvents) {
-              appEvents.trigger("discourse:flash-message", {
-                type: "success",
-                message: `已复制: ${shortUrl}`
-              });
+          }
+          // 尝试通过 dialog 服务
+          else if (container) {
+            const dialog = container.lookup("service:dialog");
+            if (dialog) {
+              dialog.alert(message);
             } else {
-              alert(`已复制: ${shortUrl}`);
+              // 最后的手段
+              alert(message);
             }
           } else {
-            // 最后的降级方案：临时改变按钮文字
-            // 注意：这可能不会触发重新渲染，取决于 Discourse 版本
-            alert(`已复制: ${shortUrl}`);
+            alert(message);
           }
-        }).catch((err) => {
-          console.error("WPCY Shortlink: Copy failed", err);
-          prompt("复制失败，请手动复制：", shortUrl);
+
+        }).catch(() => {
+          prompt(I18n.t("wpcy_shortlink.copy_failed"), shortUrl);
         });
       },
 
