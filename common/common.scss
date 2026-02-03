@@ -1,0 +1,17 @@
+/* wpcy shortlink button styles */
+.copy-shortlink-btn {
+  .d-button-label {
+    color: var(--primary);
+  }
+  
+  &:hover {
+    background: var(--primary-low);
+  }
+}
+
+/* Success state */
+.copy-shortlink-btn.copied {
+  .d-icon {
+    color: var(--success);
+  }
+}

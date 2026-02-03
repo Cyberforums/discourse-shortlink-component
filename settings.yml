@@ -1,0 +1,8 @@
+short_domain:
+  default: "wpcy.com"
+  type: string
+  description: "短链接域名"
+button_label:
+  default: "复制短链"
+  type: string
+  description: "按钮文字"
