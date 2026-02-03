@@ -2,5 +2,5 @@ import { apiInitializer } from "discourse/lib/api";
 import ShortlinkDisplay from "../components/shortlink-display";
 
 export default apiInitializer("0.11.1", (api) => {
-  api.renderInOutlet("header-topic-info__after", ShortlinkDisplay);
+  api.renderInOutlet("topic-above-posts", ShortlinkDisplay);
 });
