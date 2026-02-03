@@ -3,10 +3,15 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import DModal from "discourse/components/d-modal";
 import DButton from "discourse/components/d-button";
+import I18n from "discourse-i18n";
 
 export default class ShortlinkModal extends Component {
   @tracked copied = false;
   
+  get title() {
+    return I18n.t("wpcy_shortlink.modal_title");
+  }
+
   get fullUrl() {
     return this.args.model.shortUrl;
   }
@@ -36,7 +41,7 @@ export default class ShortlinkModal extends Component {
   }
 
   <template>
-    <DModal @title="wpcy_shortlink.modal_title" @closeModal={{@closeModal}} class="shortlink-modal">
+    <DModal @title={{this.title}} @closeModal={{@closeModal}} class="shortlink-modal">
       <:body>
         <div class="shortlink-modal-body">
           <input type="text" value={{this.displayUrl}} readonly class="shortlink-input" />
