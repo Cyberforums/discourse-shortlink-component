@@ -10,13 +10,21 @@ export default apiInitializer("0.11.1", (api) => {
     zh_CN: {
       wpcy_shortlink: {
         button_label: "短链接",
-        button_title: "获取本话题短链接"
+        button_title: "获取本话题短链接",
+        modal_title: "话题短链接",
+        copy_label: "复制链接",
+        copied_label: "已复制",
+        close_label: "关闭"
       }
     },
     en: {
       wpcy_shortlink: {
         button_label: "Short Link",
-        button_title: "Get short link for this topic"
+        button_title: "Get short link for this topic",
+        modal_title: "Topic Short Link",
+        copy_label: "Copy Link",
+        copied_label: "Copied",
+        close_label: "Close"
       }
     }
   };
@@ -43,7 +51,7 @@ export default apiInitializer("0.11.1", (api) => {
   if (api.registerTopicFooterButton) {
     api.registerTopicFooterButton({
       id: "share-shortlink",
-      icon: "link",
+      icon: "share-nodes",
       priority: 250,
 
       // 使用我们刚刚注入的键

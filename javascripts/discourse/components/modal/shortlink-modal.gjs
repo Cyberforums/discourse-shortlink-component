@@ -36,7 +36,7 @@ export default class ShortlinkModal extends Component {
   }
 
   <template>
-    <DModal @title="话题短链接" @closeModal={{@closeModal}} class="shortlink-modal">
+    <DModal @title="wpcy_shortlink.modal_title" @closeModal={{@closeModal}} class="shortlink-modal">
       <:body>
         <div class="shortlink-modal-body">
           <input type="text" value={{this.displayUrl}} readonly class="shortlink-input" />
@@ -44,13 +44,13 @@ export default class ShortlinkModal extends Component {
       </:body>
       <:footer>
         <DButton
-          @label={{if this.copied "已复制" "复制链接"}}
+          @label={{if this.copied "wpcy_shortlink.copied_label" "wpcy_shortlink.copy_label"}}
           @icon={{if this.copied "check" "copy"}}
           @action={{this.copy}}
           class="btn-primary"
         />
         <DButton
-          @label="关闭"
+          @label="wpcy_shortlink.close_label"
           @action={{@closeModal}}
           class="btn-flat"
         />
