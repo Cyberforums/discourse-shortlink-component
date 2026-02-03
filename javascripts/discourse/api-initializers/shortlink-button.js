@@ -1,7 +1,7 @@
 import { apiInitializer } from "discourse/lib/api";
 import I18n from "discourse-i18n";
 import ShortlinkFooterButton from "../components/shortlink-footer-button";
-import ShortlinkModal from "../components/modal/shortlink-modal";
+import PostShortlinkButton from "../components/post-shortlink-button";
 
 export default apiInitializer("0.11.1", (api) => {
   // 动态注入翻译
@@ -45,35 +45,10 @@ export default apiInitializer("0.11.1", (api) => {
     console.warn("WPCY Shortlink: Translation injection failed", e);
   }
 
-  // 渲染到话题底部按钮区域 (在回复、通知等按钮旁边)
-  // 这个 outlet 通常对所有用户可见
-  // 渲染到话题底部按钮区域 (主要位置)
+  // 1. 话题底部按钮 (Create Reply 之前) - 大按钮
   api.renderInOutlet("topic-footer-main-buttons-before-create", ShortlinkFooterButton);
 
-  // 额外添加：在主楼的帖子菜单中显示小图标 (确保未登录用户可见)
-  if (api.addPostMenuButton) {
-    api.addPostMenuButton("wpcy-shortlink", (attrs) => {
-      if (attrs.post_number !== 1) return;
-      return {
-        action: "showShortlinkModal",
-        icon: "share-nodes",
-        className: "share-shortlink-menu-btn",
-        title: "wpcy_shortlink.button_title",
-        position: "first"
-      };
-    });
-
-    api.attachWidgetAction("post-menu", "showShortlinkModal", function () {
-      const topicId = this.model.topic_id;
-      if (!topicId) return;
-
-      const shortDomain = settings.short_domain || "wpcy.com";
-      const shortUrl = `https://${shortDomain}/t/${topicId}`;
-
-      const modal = api.container.lookup("service:modal");
-      modal.show(ShortlinkModal, {
-        model: { shortUrl: shortUrl }
-      });
-    });
-  }
+  // 2. 主贴内容下方 - 小按钮 (确保全员可见)
+  // 使用 post-after-cooked outlet，它在帖子内容之后，操作菜单之前
+  api.renderInOutlet("post-after-cooked", PostShortlinkButton);
 });
