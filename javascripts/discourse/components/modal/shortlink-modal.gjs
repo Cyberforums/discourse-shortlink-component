@@ -7,18 +7,22 @@ import DButton from "discourse/components/d-button";
 export default class ShortlinkModal extends Component {
   @tracked copied = false;
   
-  get shortUrl() {
+  get fullUrl() {
     return this.args.model.shortUrl;
+  }
+  
+  get displayUrl() {
+    return this.fullUrl.replace(/^https?:\/\//, '');
   }
 
   @action
   copy() {
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(this.shortUrl);
+      navigator.clipboard.writeText(this.fullUrl);
     } else {
         // Fallback
         const textArea = document.createElement("textarea");
-        textArea.value = this.shortUrl;
+        textArea.value = this.fullUrl;
         document.body.appendChild(textArea);
         textArea.select();
         document.execCommand('copy');
@@ -35,7 +39,7 @@ export default class ShortlinkModal extends Component {
     <DModal @title="话题短链接" @closeModal={{@closeModal}} class="shortlink-modal">
       <:body>
         <div class="shortlink-modal-body">
-          <input type="text" value={{this.shortUrl}} readonly class="shortlink-input" />
+          <input type="text" value={{this.displayUrl}} readonly class="shortlink-input" />
         </div>
       </:body>
       <:footer>

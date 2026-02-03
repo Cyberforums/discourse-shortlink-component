@@ -5,18 +5,40 @@ import ShortlinkModal from "../components/modal/shortlink-modal";
 export default apiInitializer("0.11.1", (api) => {
   const shortDomain = settings.short_domain || "wpcy.com";
 
-  // 动态注入翻译 (解决乱码问题的终极方案)
-  I18n.translations.zh_CN = I18n.translations.zh_CN || {};
-  I18n.translations.zh_CN.wpcy_shortlink = {
-    button_label: "短链接",
-    button_title: "获取本话题短链接"
+  // 动态注入翻译 - 使用更健壮的方式
+  const translations = {
+    zh_CN: {
+      wpcy_shortlink: {
+        button_label: "短链接",
+        button_title: "获取本话题短链接"
+      }
+    },
+    en: {
+      wpcy_shortlink: {
+        button_label: "Short Link",
+        button_title: "Get short link for this topic"
+      }
+    }
   };
 
-  I18n.translations.en = I18n.translations.en || {};
-  I18n.translations.en.wpcy_shortlink = {
-    button_label: "Short Link",
-    button_title: "Get short link for this topic"
-  };
+  try {
+    if (I18n.translations) {
+      Object.keys(translations).forEach(lang => {
+        if (!I18n.translations[lang]) I18n.translations[lang] = {};
+        Object.assign(I18n.translations[lang], translations[lang]);
+      });
+    }
+
+    // 如果 I18n.extras 存在也注入
+    if (I18n.extras) {
+      Object.keys(translations).forEach(lang => {
+        if (!I18n.extras[lang]) I18n.extras[lang] = {};
+        Object.assign(I18n.extras[lang], translations[lang]);
+      });
+    }
+  } catch (e) {
+    console.warn("WPCY Shortlink: Translation injection failed", e);
+  }
 
   if (api.registerTopicFooterButton) {
     api.registerTopicFooterButton({

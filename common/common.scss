@@ -2,11 +2,15 @@
   padding: 10px 0;
 
   .shortlink-input {
-    width: 100%;
+    width: 60%;
     font-size: 1.2em;
     padding: 8px;
     border: 1px solid var(--primary-low);
     background: var(--secondary);
     color: var(--primary);
+    text-align: center;
+    margin: 0 auto;
+    display: block;
+    cursor: default;
   }
 }
