@@ -1,9 +1,12 @@
-.share-shortlink-btn {
-  .d-icon {
-    color: var(--primary-medium);
-  }
+.shortlink-modal-body {
+  padding: 10px 0;
 
-  &:hover .d-icon {
+  .shortlink-input {
+    width: 100%;
+    font-size: 1.2em;
+    padding: 8px;
+    border: 1px solid var(--primary-low);
+    background: var(--secondary);
     color: var(--primary);
   }
 }

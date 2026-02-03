@@ -1,14 +1,22 @@
 import { apiInitializer } from "discourse/lib/api";
 import I18n from "discourse-i18n";
+import ShortlinkModal from "../components/modal/shortlink-modal";
 
 export default apiInitializer("0.11.1", (api) => {
   const shortDomain = settings.short_domain || "wpcy.com";
 
-  // 使用翻译键，但在设置中允许覆盖
-  // 如果 settings.button_label 和默认值不同，我们需要动态覆盖翻译或者直接使用
-  // 为了简单，我们优先使用翻译键
-  const buttonLabelKey = "wpcy_shortlink.copy_button";
-  const buttonTitleKey = "wpcy_shortlink.copy_title";
+  // 动态注入翻译 (解决乱码问题的终极方案)
+  I18n.translations.zh_CN = I18n.translations.zh_CN || {};
+  I18n.translations.zh_CN.wpcy_shortlink = {
+    button_label: "短链接",
+    button_title: "获取本话题短链接"
+  };
+
+  I18n.translations.en = I18n.translations.en || {};
+  I18n.translations.en.wpcy_shortlink = {
+    button_label: "Short Link",
+    button_title: "Get short link for this topic"
+  };
 
   if (api.registerTopicFooterButton) {
     api.registerTopicFooterButton({
@@ -16,69 +24,21 @@ export default apiInitializer("0.11.1", (api) => {
       icon: "link",
       priority: 250,
 
-      // 使用翻译键
-      label: buttonLabelKey,
-      title: buttonTitleKey,
+      // 使用我们刚刚注入的键
+      label: "wpcy_shortlink.button_label",
+      title: "wpcy_shortlink.button_title",
 
       action() {
         const topic = this.topic || (this.args && this.args.topic);
         if (!topic || !topic.id) return;
 
-        const topicId = topic.id;
-        const shortUrl = `https://${shortDomain}/t/${topicId}`;
+        const shortUrl = `https://${shortDomain}/t/${topic.id}`;
 
-        const doCopy = () => {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            return navigator.clipboard.writeText(shortUrl);
-          } else {
-            const textArea = document.createElement("textarea");
-            textArea.value = shortUrl;
-            textArea.style.position = "fixed";
-            textArea.style.opacity = "0";
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-              document.execCommand('copy');
-              return Promise.resolve();
-            } catch (err) {
-              return Promise.reject(err);
-            } finally {
-              document.body.removeChild(textArea);
-            }
-          }
-        };
-
-        doCopy().then(() => {
-          // 使用 api.container 获取服务，确保兼容性
-          const container = api.container;
-
-          // 尝试多种与用户交互的方式
-
-          // 1. Flash Message (首选)
-          const message = I18n.t("wpcy_shortlink.copied", { url: shortUrl });
-
-          // 尝试通过 appEvents 触发
-          if (this.appEvents) {
-            this.appEvents.trigger("discourse:flash-message", {
-              type: "success",
-              message: message
-            });
-          }
-          // 尝试通过 dialog 服务
-          else if (container) {
-            const dialog = container.lookup("service:dialog");
-            if (dialog) {
-              dialog.alert(message);
-            } else {
-              // 最后的手段
-              alert(message);
-            }
-          } else {
-            alert(message);
-          }
-
-        }).catch(() => {
-          prompt(I18n.t("wpcy_shortlink.copy_failed"), shortUrl);
+        // 使用 showModal 服务显示弹窗
+        // api.container 或 this.container
+        const modal = api.container.lookup("service:modal");
+        modal.show(ShortlinkModal, {
+          model: { shortUrl: shortUrl }
         });
       },
 
