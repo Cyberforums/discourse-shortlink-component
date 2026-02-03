@@ -1,6 +1,7 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
+import { on } from "@ember/modifier";
 import { later } from "@ember/runloop";
 
 export default class ShortlinkDisplay extends Component {
@@ -36,19 +37,18 @@ export default class ShortlinkDisplay extends Component {
       this.copied = false;
     }, 1500);
   }
+  <template>
+    {{#if this.shortUrl}}
+      <div class="shortlink-container">
+        <span class="shortlink-label">短链:</span>
+        <code
+          class={{if this.copied "shortlink-url copied" "shortlink-url"}}
+          title="点击复制"
+          {{on "click" this.copyShortlink}}
+        >
+          {{if this.copied "已复制!" this.shortUrl}}
+        </code>
+      </div>
+    {{/if}}
+  </template>
 }
-
-<template>
-  {{#if this.shortUrl}}
-    <div class="shortlink-container">
-      <span class="shortlink-label">短链:</span>
-      <code
-        class={{if this.copied "shortlink-url copied" "shortlink-url"}}
-        title="点击复制"
-        {{on "click" this.copyShortlink}}
-      >
-        {{if this.copied "已复制!" this.shortUrl}}
-      </code>
-    </div>
-  {{/if}}
-</template>
