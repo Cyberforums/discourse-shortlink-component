@@ -7,8 +7,14 @@ export default class ShortlinkDisplay extends Component {
   @tracked copied = false;
 
   get shortUrl() {
+    // Discourse theme settings are globally available as "settings"
+    // specific to the theme component
     const shortDomain = settings?.short_domain || "wpcy.com";
     const topicId = this.args?.outletArgs?.topic?.id;
+    
+    // Debug log
+    // console.log("Shortlink Debug:", { shortDomain, topicId });
+
     if (!topicId) {
       return null;
     }
